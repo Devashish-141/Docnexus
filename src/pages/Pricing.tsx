@@ -16,7 +16,9 @@ const pricingTiers = [
     credits: 16500,
     badge: null,
     highlight: false,
-    description: "Perfect for individuals starting out."
+    description: "Perfect for individuals starting out.",
+    paypalMonthlyLink: "https://www.paypal.com/ncp/payment/T87PWJX7JPRDU",
+    paypalAnnualLink: "https://www.paypal.com/ncp/payment/K532H2T3BZU4Y"
   },
   {
     name: "Personal",
@@ -26,7 +28,9 @@ const pricingTiers = [
     credits: 37000,
     badge: null,
     highlight: false,
-    description: "Ideal for freelancers and professionals."
+    description: "Ideal for freelancers and professionals.",
+    paypalMonthlyLink: "https://www.paypal.com/ncp/payment/C2A6ZW8TACGK8",
+    paypalAnnualLink: "https://www.paypal.com/ncp/payment/C572JNGFFPXGJ"
   },
   {
     name: "Business",
@@ -36,7 +40,9 @@ const pricingTiers = [
     credits: 80500,
     badge: "Best Value",
     highlight: true,
-    description: "For growing teams needing power."
+    description: "For growing teams needing power.",
+    paypalMonthlyLink: "https://www.paypal.com/ncp/payment/63ZL4ZCQFRDMS",
+    paypalAnnualLink: "https://www.paypal.com/ncp/payment/2WP4H4RELGZRG"
   },
 ];
 
@@ -83,19 +89,26 @@ const Pricing = () => {
     setLoadingTier(tier.name);
 
     setTimeout(() => {
-      let planParam = tier.id;
-      let extraParams = "";
+      // Redirect to appropriate PayPal link based on billing period
+      const paypalLink = isAnnual ? tier.paypalAnnualLink : tier.paypalMonthlyLink;
 
-      // Logic: Business tier gets high priority
-      if (["business"].includes(tier.id)) {
-        planParam = "business";
-        extraParams = "&priority=high&tier=" + tier.id;
+      if (paypalLink) {
+        window.location.href = paypalLink;
       } else {
-        // Basic & Personal
-        extraParams = "&tier=" + tier.id;
+        // Fallback to auth flow if PayPal link is not available
+        let planParam = tier.id;
+        let extraParams = "";
+
+        if (["business"].includes(tier.id)) {
+          planParam = "business";
+          extraParams = "&priority=high&tier=" + tier.id;
+        } else {
+          extraParams = "&tier=" + tier.id;
+        }
+
+        navigate(`/auth?mode=signup&plan=${planParam}${extraParams}`);
       }
 
-      navigate(`/auth?mode=signup&plan=${planParam}${extraParams}`);
       setLoadingTier(null);
     }, 800);
   };
