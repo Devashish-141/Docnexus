@@ -18,7 +18,7 @@ const pricingTiers = [
     highlight: false,
     description: "Perfect for individuals starting out.",
     paypalMonthlyLink: "https://www.paypal.com/ncp/payment/T87PWJX7JPRDU",
-    paypalAnnualLink: "https://www.paypal.com/ncp/payment/K532H2T3BZU4Y"
+    paypalAnnualLink: "https://www.paypal.com/ncp/payment/REZTP4B6J2WD2"
   },
   {
     name: "Personal",
@@ -30,7 +30,7 @@ const pricingTiers = [
     highlight: false,
     description: "Ideal for freelancers and professionals.",
     paypalMonthlyLink: "https://www.paypal.com/ncp/payment/C2A6ZW8TACGK8",
-    paypalAnnualLink: "https://www.paypal.com/ncp/payment/C572JNGFFPXGJ"
+    paypalAnnualLink: "https://www.paypal.com/ncp/payment/DGHGWD43XHH5E"
   },
   {
     name: "Business",
@@ -42,7 +42,7 @@ const pricingTiers = [
     highlight: true,
     description: "For growing teams needing power.",
     paypalMonthlyLink: "https://www.paypal.com/ncp/payment/63ZL4ZCQFRDMS",
-    paypalAnnualLink: "https://www.paypal.com/ncp/payment/2WP4H4RELGZRG"
+    paypalAnnualLink: "https://www.paypal.com/ncp/payment/XUTF8AMSCBTUJ"
   },
 ];
 
