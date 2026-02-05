@@ -1,23 +1,31 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+import type { Handler } from '@netlify/functions';
 import { supabase } from './lib/supabase';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: "Method Not Allowed" });
+export const handler: Handler = async (event) => {
+    if (event.httpMethod !== 'POST') {
+        return {
+            statusCode: 405,
+            body: JSON.stringify({ error: "Method Not Allowed" })
+        };
     }
 
     try {
-        const adminKeyHeader = req.headers['x-admin-key'];
-        const adminKey = Array.isArray(adminKeyHeader) ? adminKeyHeader[0] : adminKeyHeader;
+        const adminKey = event.headers['x-admin-key'];
 
         if (!adminKey || adminKey !== process.env.ADMIN_API_KEY) {
-            return res.status(403).json({ error: "Forbidden: Invalid Admin Key" });
+            return {
+                statusCode: 403,
+                body: JSON.stringify({ error: "Forbidden: Invalid Admin Key" })
+            };
         }
 
-        const { email, credits } = req.body || {};
+        const { email, credits } = JSON.parse(event.body || '{}');
 
         if (!email || typeof credits !== 'number') {
-            return res.status(400).json({ error: "Email and credits (number) required" });
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ error: "Email and credits (number) required" })
+            };
         }
 
         // Get user from Supabase
@@ -28,7 +36,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             .single();
 
         if (fetchError || !user) {
-            return res.status(404).json({ error: "User not found" });
+            return {
+                statusCode: 404,
+                body: JSON.stringify({ error: "User not found" })
+            };
         }
 
         // Update user credits
@@ -39,7 +50,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             .eq('id', user.id);
 
         if (updateError) {
-            return res.status(500).json({ error: updateError.message });
+            return {
+                statusCode: 500,
+                body: JSON.stringify({ error: updateError.message })
+            };
         }
 
         // Log this admin action
@@ -51,12 +65,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 cost: -credits,
             });
 
-        return res.status(200).json({
-            message: "Credits updated successfully",
-            user: { email: user.email, credits: newCredits }
-        });
+        return {
+            statusCode: 200,
+            body: JSON.stringify({
+                message: "Credits updated successfully",
+                user: { email: user.email, credits: newCredits }
+            })
+        };
 
     } catch (error: any) {
-        return res.status(500).json({ error: error.message });
+        return {
+            statusCode: 500,
+            body: JSON.stringify({ error: error.message })
+        };
     }
-}
+};

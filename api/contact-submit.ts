@@ -1,14 +1,20 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+import type { Handler } from '@netlify/functions';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method not allowed' });
+export const handler: Handler = async (event) => {
+    if (event.httpMethod !== 'POST') {
+        return {
+            statusCode: 405,
+            body: JSON.stringify({ error: 'Method not allowed' })
+        };
     }
 
-    const { name, email, subject, message } = req.body || {};
+    const { name, email, subject, message } = JSON.parse(event.body || '{}');
 
     if (!name || !email || !message) {
-        return res.status(400).json({ error: 'Missing required fields' });
+        return {
+            statusCode: 400,
+            body: JSON.stringify({ error: 'Missing required fields' })
+        };
     }
 
     // TODO: Integrate with an email service (Resend, SendGrid, etc.)
@@ -18,8 +24,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Simulate delay
     await new Promise((resolve) => setTimeout(resolve, 500));
 
-    return res.status(200).json({
-        success: true,
-        message: 'Message received successfully. We will get back to you shortly.'
-    });
-}
+    return {
+        statusCode: 200,
+        body: JSON.stringify({
+            success: true,
+            message: 'Message received successfully. We will get back to you shortly.'
+        })
+    };
+};

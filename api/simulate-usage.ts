@@ -1,17 +1,22 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+import type { Handler } from '@netlify/functions';
 import { supabase } from './lib/supabase';
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: "Method Not Allowed" });
+export const handler: Handler = async (event) => {
+    if (event.httpMethod !== 'POST') {
+        return {
+            statusCode: 405,
+            body: JSON.stringify({ error: "Method Not Allowed" })
+        };
     }
 
     try {
-        const apiKeyHeader = req.headers['x-api-key'];
-        const apiKey = Array.isArray(apiKeyHeader) ? apiKeyHeader[0] : apiKeyHeader;
+        const apiKey = event.headers['x-api-key'];
 
         if (!apiKey) {
-            return res.status(401).json({ error: "Missing x-api-key header" });
+            return {
+                statusCode: 401,
+                body: JSON.stringify({ error: "Missing x-api-key header" })
+            };
         }
 
         // Find user by API key
@@ -22,11 +27,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             .single();
 
         if (userError || !user) {
-            return res.status(401).json({ error: "Invalid API Key" });
+            return {
+                statusCode: 401,
+                body: JSON.stringify({ error: "Invalid API Key" })
+            };
         }
 
         if (user.credits <= 0) {
-            return res.status(402).json({ error: "Insufficient credits. Please recharge." });
+            return {
+                statusCode: 402,
+                body: JSON.stringify({ error: "Insufficient credits. Please recharge." })
+            };
         }
 
         // Deduct Credit
@@ -37,7 +48,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             .eq('id', user.id);
 
         if (updateError) {
-            return res.status(500).json({ error: updateError.message });
+            return {
+                statusCode: 500,
+                body: JSON.stringify({ error: updateError.message })
+            };
         }
 
         // Log Usage
@@ -49,13 +63,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 cost: 1,
             });
 
-        return res.status(200).json({
-            success: true,
-            remaining_credits: newCredits,
-            message: "Usage simulated. 1 credit deducted."
-        });
+        return {
+            statusCode: 200,
+            body: JSON.stringify({
+                success: true,
+                remaining_credits: newCredits,
+                message: "Usage simulated. 1 credit deducted."
+            })
+        };
 
     } catch (error: any) {
-        return res.status(500).json({ error: error.message });
+        return {
+            statusCode: 500,
+            body: JSON.stringify({ error: error.message })
+        };
     }
-}
+};
