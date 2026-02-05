@@ -21,8 +21,8 @@ const pricingTiers = [
   {
     name: "Personal",
     id: "personal",
-    monthlyPrice: 29.99,
-    annualPrice: 27.49,
+    monthlyPrice: 24.99,
+    annualPrice: 22.99,
     credits: 37000,
     badge: null,
     highlight: false,
@@ -167,8 +167,8 @@ const Pricing = () => {
                 >
                   <Card
                     className={`relative h-full flex flex-col overflow-visible bg-card border-2 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${isRecommended
-                        ? 'border-primary shadow-lg ring-1 ring-primary/20 bg-gradient-to-b from-card to-primary/5'
-                        : 'border-border/50 hover:border-border'
+                      ? 'border-primary shadow-lg ring-1 ring-primary/20 bg-gradient-to-b from-card to-primary/5'
+                      : 'border-border/50 hover:border-border'
                       }`}
                   >
                     {isRecommended && (
@@ -219,8 +219,8 @@ const Pricing = () => {
                         onClick={() => handleGetStarted(tier)}
                         disabled={!!loadingTier}
                         className={`w-full py-6 font-semibold shadow-lg transition-transform active:scale-95 ${isRecommended
-                            ? 'bg-primary hover:bg-primary/90 text-primary-foreground'
-                            : 'bg-secondary hover:bg-secondary/80 text-secondary-foreground border border-border/50'
+                          ? 'bg-primary hover:bg-primary/90 text-primary-foreground'
+                          : 'bg-secondary hover:bg-secondary/80 text-secondary-foreground border border-border/50'
                           }`}
                       >
                         {loadingTier === tier.name ? (

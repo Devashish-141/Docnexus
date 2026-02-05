@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth API Test Tool</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .output {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-left: 4px solid #4CAF50;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .error {
+            border-left-color: #f44336;
+            background: #ffebee;
+            color: #c62828;
+        }
+        .success {
+            border-left-color: #4CAF50;
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .info {
+            background: #e3f2fd;
+            border-left-color: #2196F3;
+            color: #1565c0;
+            padding: 10px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Authentication API Test Tool</h1>
+        
+        <div class="info">
+            <strong>Purpose:</strong> Test your authentication endpoints to see exact error messages.
+            <br><strong>Use this on:</strong> Your deployed Netlify site OR localhost
+        </div>
+
+        <div class="form-group">
+            <label for="apiUrl">API Base URL:</label>
+            <select id="apiUrl" onchange="updateUrl()">
+                <option value="">-- Deployed Netlify Site --</option>
+                <option value="http://localhost:8888">Local (localhost:8888)</option>
+                <option value="custom">Custom URL...</option>
+            </select>
+            <input type="text" id="customUrl" placeholder="https://your-site.netlify.app" style="margin-top: 10px; display: none;">
+        </div>
+
+        <div class="form-group">
+            <label for="endpoint">Endpoint:</label>
+            <select id="endpoint">
+                <option value="/api/auth-signup">Sign Up (/api/auth-signup)</option>
+                <option value="/api/auth-login">Login (/api/auth-login)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="name">Name: (for signup only)</label>
+            <input type="text" id="name" placeholder="John Doe" value="Test User">
+        </div>
+
+        <div class="form-group">
+            <label for="company">Company: (for signup only)</label>
+            <input type="text" id="company" placeholder="My Company" value="Test Company">
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" placeholder="test@example.com" value="test@example.com">
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" placeholder="password123" value="password123">
+        </div>
+
+        <button onclick="testAuth()">🚀 Test Authentication</button>
+        <button onclick="clearOutput()" style="background: #666;">Clear Output</button>
+
+        <div id="output"></div>
+    </div>
+
+    <script>
+        function updateUrl() {
+            const select = document.getElementById('apiUrl');
+            const customInput = document.getElementById('customUrl');
+            if (select.value === 'custom') {
+                customInput.style.display = 'block';
+            } else {
+                customInput.style.display = 'none';
+            }
+        }
+
+        function getBaseUrl() {
+            const select = document.getElementById('apiUrl');
+            if (select.value === 'custom') {
+                return document.getElementById('customUrl').value || window.location.origin;
+            }
+            return select.value || window.location.origin;
+        }
+
+        async function testAuth() {
+            const output = document.getElementById('output');
+            const endpoint = document.getElementById('endpoint').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const name = document.getElementById('name').value;
+            const company = document.getElementById('company').value;
+            const baseUrl = getBaseUrl();
+
+            output.innerHTML = '⏳ Testing authentication...\n\n';
+            output.className = 'output';
+
+            const payload = endpoint.includes('signup') 
+                ? { email, password, name, company }
+                : { email, password };
+
+            const fullUrl = baseUrl + endpoint;
+
+            output.innerHTML += `📍 Testing: ${fullUrl}\n`;
+            output.innerHTML += `📦 Payload: ${JSON.stringify(payload, null, 2)}\n\n`;
+
+            try {
+                const startTime = Date.now();
+                const response = await fetch(fullUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const endTime = Date.now();
+
+                const data = await response.json();
+
+                output.innerHTML += `⏱️  Response Time: ${endTime - startTime}ms\n\n`;
+                output.innerHTML += `📊 Status Code: ${response.status}\n`;
+                output.innerHTML += `📊 Status Text: ${response.statusText}\n\n`;
+
+                if (response.ok) {
+                    output.innerHTML += `✅ SUCCESS!\n\n`;
+                    output.innerHTML += `📄 Response:\n${JSON.stringify(data, null, 2)}\n`;
+                    output.className = 'output success';
+                } else {
+                    output.innerHTML += `❌ FAILED!\n\n`;
+                    output.innerHTML += `📄 Error Response:\n${JSON.stringify(data, null, 2)}\n`;
+                    output.className = 'output error';
+                    
+                    // Helpful hints based on error
+                    output.innerHTML += `\n💡 Troubleshooting Hints:\n`;
+                    if (response.status === 404) {
+                        output.innerHTML += `- Function not found. Check netlify.toml configuration.\n`;
+                        output.innerHTML += `- Make sure functions deployed correctly.\n`;
+                    } else if (response.status === 500) {
+                        output.innerHTML += `- Server error. Check Netlify function logs.\n`;
+                        output.innerHTML += `- Verify environment variables are set.\n`;
+                        if (data.details) {
+                            output.innerHTML += `- Error details: ${data.details}\n`;
+                        }
+                    } else if (response.status === 400) {
+                        output.innerHTML += `- Check if all required fields are filled.\n`;
+                        if (data.error?.includes('already exists')) {
+                            output.innerHTML += `- Try a different email address.\n`;
+                        }
+                    }
+                }
+            } catch (error) {
+                output.innerHTML += `❌ NETWORK ERROR!\n\n`;
+                output.innerHTML += `Error: ${error.message}\n\n`;
+                output.innerHTML += `💡 This usually means:\n`;
+                output.innerHTML += `- CORS issue\n`;
+                output.innerHTML += `- Function doesn't exist\n`;
+                output.innerHTML += `- Network connection problem\n`;
+                output.innerHTML += `- Wrong URL\n`;
+                output.className = 'output error';
+            }
+        }
+
+        function clearOutput() {
+            document.getElementById('output').innerHTML = '';
+            document.getElementById('output').className = 'output';
+        }
+
+        // Set deployed URL as placeholder
+        window.addEventListener('load', () => {
+            const customInput = document.getElementById('customUrl');
+            if (window.location.hostname !== 'localhost') {
+                customInput.placeholder = window.location.origin;
+            }
+        });
+    </script>
+</body>
+</html>

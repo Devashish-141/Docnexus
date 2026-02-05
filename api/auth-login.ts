@@ -49,9 +49,24 @@ export const handler: Handler = async (event) => {
             })
         };
     } catch (error: any) {
+        console.error('[AUTH-LOGIN] Error:', error);
+
+        // Check if it's a configuration error
+        if (error.message?.includes('environment variable')) {
+            return {
+                statusCode: 500,
+                body: JSON.stringify({
+                    error: 'Server configuration error. Please contact administrator.',
+                    details: error.message
+                })
+            };
+        }
+
         return {
             statusCode: 500,
             body: JSON.stringify({ error: error.message })
         };
     }
 };
+
+

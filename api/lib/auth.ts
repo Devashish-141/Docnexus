@@ -2,7 +2,8 @@ import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
-    throw new Error("Missing JWT_SECRET in .env");
+    console.error('[AUTH] Missing JWT_SECRET environment variable');
+    throw new Error("Missing JWT_SECRET environment variable. Please configure it in Netlify dashboard or .env file");
 }
 
 export const signToken = (userId: string) => {
